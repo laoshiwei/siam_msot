@@ -1,9 +1,13 @@
 # siam_ms
 
 add yolo5x6 under tools
+
 download model.pth and dataset + json under experiments like the original pysot
+
 you might have to add color folder under
+
 change address
+
 export PYTHONPATH=/home/atur/pysot-mot:$PYTHONPATHot
 
 
