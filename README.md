@@ -18,7 +18,7 @@ similar to pysot
 
 python tools/demo_mot.py --config /home/atur/pysot-mot/experiments/siamrpn_r50_l234_dwxcorr/config.yaml --snapshot /home/atur/pysot-mot/experiments/siamrpn_r50_l234_dwxcorr/model.pth --video /home/atur/videos/basketball.avi
 
-It is still not stable enough, but this is the point I came to during the internship.
+It is still not stable enough, but this is the point I came to during the internship. You can use this is a starting point I guess.
 
 # siamtracker automatic
 
