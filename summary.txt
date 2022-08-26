@@ -1,0 +1,107 @@
+ssh -X root@10.151.245.21
+ssh -X atur@10.151.245.21
+bash
+conda activate torch
+
+start:                 
+export PYTHONPATH=/home/hvl/İndirilenler/pysot:$PYTHONPATH
+export PYTHONPATH=/home/atur/pysot:$PYTHONPATH
+export PYTHONPATH=/home/atur/pysot-mot:$PYTHONPATH
+export PYTHONPATH=/home/atur/pysot-toolkit:$PYTHONPATH
+
+for demo:
+export CUDA_VISIBLE_DEVICES=1
+python tools/demo.py --config experiments/siamrpn_r50_l234_dwxcorr/config.yaml --snapshot experiments/siamrpn_r50_l234_dwxcorr/model.pth --video demo/bag.avi
+python tools/demo_mot.py --config /home/atur/pysot-mot/experiments/siamrpn_r50_l234_dwxcorr/config.yaml --snapshot /home/atur/pysot-mot/experiments/siamrpn_r50_l234_dwxcorr/model.pth --video /home/atur/videos/basketball.avi
+
+for test:
+cd experiments/siamrpn_r50_l234_dwxcorr
+python -u ../../tools/test.py --snapshot model.pth --dataset VOT2018 --config config.yaml --vis
+python -u ../../tools/test_on_vid.py --snapshot model.pth --dataset VOT2018 --config config.yaml --vis
+
+for eval:
+python ../../tools/eval.py --tracker_path ./results --dataset VOT2018 --num 1 --tracker_prefix 'model'
+
+for yolov6:
+python tools/infer.py --weights yolov6s.pt --source /home/atur/pysot/testing_dataset/VOT2018/ants1/00000001.jpg
+
+
+Multiple-object_detection :  
+python custom_deepsort.py --yolo_weights /home/atur/Multiple-Object-Tracking/yolov5x6.pt --source /home/atur/cheetah.mp4 --device GPU_ID_2_USE 
+
+automatic det
+python bin/eval.py --dataset_dir /home/atur/pysot/experiments/siamrpn_r50_l234_dwxcorr --dataset VOT2018 --tracker_result_dir /home/atur/pytracking/pytracking/tracking_results/tomp/tomp50_000 --trackers tomp50ection:
+python tools/demo_yolov5.py --config experiments/siamrpn_r50_l234_dwxcorr/config.yaml --snapshot experiments/siamrpn_r50_l234_dwxcorr/model.pth --video demo/bag.avi
+python tools/demo_yolov5.py --config experiments/siamrpn_r50_l234_dwxcorr/config.yaml --snapshot experiments/siamrpn_r50_l234_dwxcorr/model.pth --video demo/bag.avi
+
+gradio demo:
+python ./pysot/tools/demo_gradio.py
+http://127.0.0.1:7860/
+
+
+to use:
+ret = result[tracker_name]
+overlaps = list(itertools.chain(*ret['overlaps'].values()))
+accuracy = np.nanmean(overlaps)
+length = sum([len(x) for x in ret['overlaps'].values()])
+failures = list(ret['failures'].values())
+lost_number = np.mean(np.sum(failures, axis=0))
+robustness = np.mean(np.sum(np.array(failures), axis=0) / length) * 100
+
+check env properties like cuda:
+python -m torch.utils.collect_envs
+
+running tomp:
+conda activate pytrack
+cd pytracking/pytracking
+export CUDA_VISIBLE_DEVICES=1
+python run_video.py tomp tomp50 /home/atur/cheetah.mp4
+
+eval:
+python run_tracker.py tomp tomp50 --dataset_name vot
+python run_experiment.py myexperiments uav_test
+
+results:
+pytracking/pytracking/tracking_results/tomp/tomp50_000
+
+pysot toolkit eval for tomp:
+export PYTHONPATH=/home/atur/pysot/pysot/pysot-toolkit:$PYTHONPATH
+cd pysot-toolkit
+python bin/eval.py --dataset_dir /home/atur/pysot/experiments/siamrpn_r50_l234_dwxcorr --dataset VOT2018 --tracker_result_dir /home/atur/pytracking/pytracking/tracking_results--trackers tomp50
+python bin/eval.py --dataset_dir /home/atur/pysot/experiments/siamrpn_r50_l234_dwxcorr --dataset VOT2018 --tracker_result_dir /home/atur/pysot/experiments/siamrpn_r50_l234_dwxcorr/results/VOT2018/tomp50/baseline --trackers tomp50
+python bin/eval.py --dataset_dir /home/atur/pysot/experiments/siamrpn_r50_l234_dwxcorr --dataset VOT2018 --tracker_result_dir /home/atur/pysot-toolkit/pytrack_model --trackers tomp50
+
+MOT:
+export CUDA_HOME="/usr/local/cuda-10.1"
+export CUDA_PATH="$CUDA_HOME"
+export PATH="$CUDA_HOME/bin:$PATH"
+export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$CUDA_HOME/lib:$CUDA_HOME/extras/CUPTI/lib64:$CUDA_HOME/efa/lib:$LD_LIBRARY_PATH"
+
+
+export PYTHONPATH=.:$PYTHONPATH
+demo:
+python3 demos/demo.py --demo-video /home/atur/videos/traffic.avi --track-class person_vehicle --dump-video True
+
+test:
+cd siam-mot
+export PYTHONPATH=.:$PYTHONPATH # has to be on correct address
+python3 tools/test_net.py --config-file configs/dla/DLA_34_FPN.yaml --output-dir ../mot_res --model-file PATH_TO_MODEL_FILE --test-dataset DATASET_KEY --set val
+
+/home/atur/.cache/torch/hub/checkpoints/dla34-ba72cf86.pth
+"http://dl.yf.io/dla/models/imagenet/dla34-ba72cf86.pth"
+websites:
+https://stackoverflow.com/questions/28932864/cuda-compute-capability-requirements
+https://github.com/STVIR/pysot
+https://gradio.app/docs/
+https://medium.com/@cindy.trinh.sridykhan/a-tour-of-video-object-tracking-part-ii-single-object-tracking-708261304ea7
+https://data.votchallenge.net/vot2015/presentations/vot_2015_paper.pdf
+https://www.votchallenge.net/vot2018/trackers.html MFT AND LADCF
+https://github.com/XU-TIANYANG/LADCF
+https://github.com/visionml/pytracking#eco
+https://github.com/visionml/pytracking/tree/master/pytracking#analysis
+https://www.geeksforgeeks.org/python-matrix-multiplication-using-pytorch/
+https://github.com/StrangerZhang/pysot-toolkit/issues/13
+https://github.com/amazon-research/siam-mot
+https://arxiv.org/pdf/2105.11595.pdf --simamot
+https://code.ornl.gov/thorn/thorn-model-zoo/-/blob/main/dla34-ba72cf86.pth
+https://stackoverflow.com/questions/45853586/multiple-single-object-trackers-does-it-give-multiple-object-tracker
